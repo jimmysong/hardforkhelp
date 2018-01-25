@@ -710,6 +710,7 @@ class BTGTx(BCHTx):
 
 class BCXTx(BTGTx):
     fork_block = 498888
+    fork_id = 0
     default_hash_type = 0x11
     p2pkh_prefixes = (0x4b, 0x41, 0x00)
     p2sh_prefixes = (0x3f, 0xc4, 0x05)
@@ -720,7 +721,6 @@ class BTFTx(BCHTx):
     fork_id = 70 << 8
     p2pkh_prefixes = (0x24, 0x60)
     p2sh_prefixes = (0x28, 0x65)
-
 
 
 class BTWTx(BCHTx):
