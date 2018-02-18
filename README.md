@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jimmysong/hardforkhelp.svg?branch=master)](https://travis-ci.org/jimmysong/hardforkhelp)
+
 # Pre-Requisites
 
 Install python 3.5 or above on your machine:
