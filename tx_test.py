@@ -8,7 +8,7 @@ from helper import (
     SIGHASH_ALL,
 )
 from script import Script
-from tx import Tx, TxIn, TxOut, BCDTx, BTGTx, SBTCTx, BCHTx
+from tx import Tx, TxIn, TxOut, BCDTx, BTGTx, SBTCTx, BCHTx, B2XTx
 
 
 class TxTest(TestCase):
@@ -288,6 +288,26 @@ class TxTest(TestCase):
         tx.tx_ins[1]._value = 5300000
         tx.tx_ins[0]._script_pubkey = Script.parse(p2pkh_script(h160))
         self.assertTrue(tx.verify())
+
+    def test_b2x_sign(self):
+        # Generated from ./bitcoin2x-qt -regtest
+        wif = 'cVC6z7gnezHZut5yyuCX3x79tfcbauCWiFcBY92Vg4crfu4Maa5B'
+        prev_tx = 'b6d073333c1a8e4360b1e2c7fa2ed6b67b74272ad7fabf52a4e4732df5f47dbd'
+        prev_index = 0
+        prev_value = 5000000000
+        destination = 'mrVqpGm7F5MVCwsP4s3fQEN2GAaykJoTu4'
+        amount = 4996000000
+
+        priv_key = PrivateKey.parse(wif)
+        prev_script_pubkey = B2XTx.get_address_data(priv_key.point.address())['script_pubkey'].serialize()
+        tx_in = TxIn(unhexlify(prev_tx), prev_index, b'', 0xffffffff, b'\x00', prev_value, prev_script_pubkey)
+        script = B2XTx.get_address_data(destination)['script_pubkey'].serialize()
+        tx_out = TxOut(amount, script)
+        tx = B2XTx(2, [tx_in], [tx_out], 0, testnet=True)
+        tx.sign(priv_key)
+        want = "0200000001bd7df4f52d73e4a452bffad72a27747bb6d62efac7e2b160438e1a3c3373d0b6000000006a47304402201df7c8c97443bd46da751e0051a4395ba3613be3604be97d3c801c21e3d23c79022012ad30b7ffd42ad7bb96f9157519f7e3c35409ed54f783a3c854a596343a6c713121030f96812693c4a50162134cfa307afb63580171963d6c4198e8e5cfeee2c92b60ffffffff0100e9c829010000001976a91478738f2c5a75397eb2f851597261f766a67d9b6388ac00000000"
+        self.assertTrue(tx.verify())
+        self.assertEqual(tx.serialize().hex(), want)
 
     def test_fetch_address_utxos(self):
         addr = 'mgzCpjQxLVmw89FRrxrZqpzfE33HRAjaSU'
