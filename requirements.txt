@@ -1,4 +1,7 @@
+nbconvert
+nbformat
 jupyter
+pytest
 nose
 pbkdf2
 requests
