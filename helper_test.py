@@ -37,10 +37,20 @@ class HelperTest(TestCase):
     def test_p2pkh_script(self):
         h160 = unhexlify('74d691da1574e6b3c192ecfb52cc8984ee7b6c56')
         self.assertEqual(p2pkh_script(h160)[3:-2], h160)
+        
+    def test_long_p2pkh_script(self):
+        h160 = unhexlify('c45f1b548d1bc074828c415639b207a19cea1b5d4a')
+        expected = unhexlify('76a915c45f1b548d1bc074828c415639b207a19cea1b5d4a88ac')
+        self.assertEqual(p2pkh_script(h160), expected)
 
     def test_p2sh_script(self):
         h160 = unhexlify('74d691da1574e6b3c192ecfb52cc8984ee7b6c56')
         self.assertEqual(p2sh_script(h160)[2:-1], h160)
+        
+    def test_long_p2sh_script(self):
+        h160 = unhexlify('c45f1b548d1bc074828c415639b207a19cea1b5d4a')
+        expected = unhexlify('a915c45f1b548d1bc074828c415639b207a19cea1b5d4a87')
+        self.assertEqual(p2sh_script(h160), expected)
 
     def test_varint(self):
         tests = [

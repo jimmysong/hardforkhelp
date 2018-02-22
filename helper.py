@@ -59,12 +59,14 @@ def decode_base58(s, num_bytes=25, strip_leading_zeros=False):
 
 def p2pkh_script(h160):
     '''Takes a hash160 and returns the scriptPubKey'''
-    return b'\x76\xa9\x14' + h160 + b'\x88\xac'
+    length = bytes([len(h160)])
+    return b'\x76\xa9' + length + h160 + b'\x88\xac'
 
 
 def p2sh_script(h160):
     '''Takes a hash160 and returns the scriptPubKey'''
-    return b'\xa9\x14' + h160 + b'\x87'
+    length = bytes([len(h160)])
+    return b'\xa9' + length + h160 + b'\x87'
 
 
 def read_varint(s):
