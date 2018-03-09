@@ -693,7 +693,7 @@ class BTGTx(BCHTx):
     fork_id = 79 << 8
     p2pkh_prefixes = (0x26, 0x6f, 0x00)
     p2sh_prefixes = (0x17, 0xc4, 0x05)
-    
+
     def sign_input(self, input_index, private_key, hash_type, compressed=True):
         '''Signs the input using the private key'''
         # get the hash to sign
@@ -962,6 +962,14 @@ class SBTCTx(ForkTx):
         for i in range(len(self.tx_ins)):
             if not self.sign_input(i, private_key, hash_type, compressed=compressed):
                 raise RuntimeError('signing failed')
+
+
+class BTNTx(BTGTx):
+    """
+    Bitcoin New (http://btn.kim)
+    """
+    fork_block = 501000
+    fork_id = 88 << 8
 
 
 class TxIn(LibBitcoinClient):
