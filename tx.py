@@ -48,7 +48,7 @@ class Tx(LibBitcoinClient):
 
     default_version = 1
     default_hash_type = 1
-    hash_type_pre_image = default_hash_type
+    sig_hash_type = default_hash_type
     cache = {}
     p2pkh_prefixes = (0x00, 0x6f)
     p2sh_prefixes = (0x05, 0xc4)
@@ -434,7 +434,7 @@ class Tx(LibBitcoinClient):
         s += int_to_little_endian(tx_in.sequence, 4)
         s += self.hash_outputs()
         s += int_to_little_endian(self.locktime, 4)
-        s += int_to_little_endian(self.hash_type_pre_image, 4)
+        s += int_to_little_endian(self.sig_hash_type, 4)
         return s
 
     def sig_hash_bip143(self, input_index, hash_type):
@@ -476,7 +476,7 @@ class Tx(LibBitcoinClient):
         )
         # add the hash_type
         result = alt_tx.serialize()
-        result += int_to_little_endian(self.hash_type_pre_image, 4)
+        result += int_to_little_endian(self.sig_hash_type, 4)
         return int.from_bytes(double_sha256(result), 'big')
 
     def verify_input(self, input_index):
@@ -573,7 +573,7 @@ class Tx(LibBitcoinClient):
         return True
 
     def sign(self, private_key, compressed=True):
-        hash_type = SIGHASH_ALL
+        hash_type = SIGHASH_ALL | self.default_hash_type
         for i in range(len(self.tx_ins)):
             if not self.sign_input(i, private_key, hash_type, compressed=compressed):
                 raise RuntimeError('signing failed')
@@ -609,14 +609,7 @@ class ForkTx(Tx):
 class B2XTx(ForkTx):
     fork_block = 501451
     default_hash_type = 0x21 | 0x10
-    hash_type_pre_image = default_hash_type << 1
-
-    def sign(self, private_key, compressed=True):
-        hash_type = self.default_hash_type
-        for i in range(len(self.tx_ins)):
-            if not self.sign_input(
-                    i, private_key, hash_type, compressed=compressed):
-                raise RuntimeError('signing failed')
+    sig_hash_type = default_hash_type << 1
 
 
 class BCHTx(ForkTx):
@@ -962,6 +955,12 @@ class SBTCTx(ForkTx):
         for i in range(len(self.tx_ins)):
             if not self.sign_input(i, private_key, hash_type, compressed=compressed):
                 raise RuntimeError('signing failed')
+
+
+class BTVTx(ForkTx):
+    fork_block = 505050
+    default_hash_type = 0x41
+    sig_hash_type = default_hash_type | 50 << 8
 
 
 class TxIn(LibBitcoinClient):

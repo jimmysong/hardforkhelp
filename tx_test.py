@@ -8,7 +8,7 @@ from helper import (
     SIGHASH_ALL,
 )
 from script import Script
-from tx import Tx, TxIn, TxOut, BCDTx, BTGTx, SBTCTx, BCHTx, B2XTx
+from tx import Tx, TxIn, TxOut, BCDTx, BTGTx, SBTCTx, BCHTx, B2XTx, BTVTx
 
 
 class TxTest(TestCase):
@@ -306,6 +306,25 @@ class TxTest(TestCase):
         tx = B2XTx(2, [tx_in], [tx_out], 0, testnet=True)
         tx.sign(priv_key)
         want = "0200000001bd7df4f52d73e4a452bffad72a27747bb6d62efac7e2b160438e1a3c3373d0b6000000006a47304402201df7c8c97443bd46da751e0051a4395ba3613be3604be97d3c801c21e3d23c79022012ad30b7ffd42ad7bb96f9157519f7e3c35409ed54f783a3c854a596343a6c713121030f96812693c4a50162134cfa307afb63580171963d6c4198e8e5cfeee2c92b60ffffffff0100e9c829010000001976a91478738f2c5a75397eb2f851597261f766a67d9b6388ac00000000"
+        self.assertTrue(tx.verify())
+        self.assertEqual(tx.serialize().hex(), want)
+
+    def test_btv_sign(self):
+        wif = 'cUio9ok9CXDfByfGEiRi8snZmwSaAbnvdbmfg72wegPdkX4b7Cq5'
+        prev_tx = 'c9338d3cb5ce17fcfaee8ccadd7513110aee3148fbce1bc978d245d180fd7ad8'
+        prev_index = 1
+        prev_value = 1000000000
+        destination = 'msDmp5xD5hNLsiyasWjNpuxPuz1BfY2G9R'
+        amount = 996000000
+
+        priv_key = PrivateKey.parse(wif)
+        prev_script_pubkey = BTVTx.get_address_data(priv_key.point.address())['script_pubkey'].serialize()
+        tx_in = TxIn(unhexlify(prev_tx), prev_index, b'', 0xffffffff, b'\x00', prev_value, prev_script_pubkey)
+        script = BTVTx.get_address_data(destination)['script_pubkey'].serialize()
+        tx_out = TxOut(amount, script)
+        tx = BTVTx(2, [tx_in], [tx_out], 0, testnet=True)
+        tx.sign(priv_key)
+        want = "0200000001d87afd80d145d278c91bcefb4831ee0a111375ddca8ceefafc17ceb53c8d33c9010000006a47304402201d751f140d560c127ab6f3583dd9052c7556cd9457baa59c4087350840182f9b0220296cdbabb280591ef013a15e975c93e2cedb8c6fa30f9eed359a2bb125847562412103e9745d6b951c47251c63e7677985c2e8f90a85073c9a9461485f7711f3a66707ffffffff0100c15d3b000000001976a9148061b01d9ad56cbe943fe4b55ab4629136a3596e88ac00000000"
         self.assertTrue(tx.verify())
         self.assertEqual(tx.serialize().hex(), want)
 
